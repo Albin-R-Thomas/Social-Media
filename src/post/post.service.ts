@@ -13,17 +13,27 @@ export class PostService {
       const newPost = await this.prisma.post.create({
         data: {
           title: postBody.title,
-          desc: postBody.desc,
+          desc: postBody.description,
           User: {
             connect: {
               id: currentUserId,
             },
           },
         },
+        include: {
+          User: true,
+          postLike: {
+            include: {
+              User: true,
+              Post: true,
+            },
+          },
+          comment: true,
+        },
       });
       return newPost;
     } catch (error) {
-      return { error: 'something went wrong' };
+      return { error: error.message };
     }
   }
 
@@ -37,6 +47,13 @@ export class PostService {
         },
         include: {
           User: true,
+          postLike: {
+            include: {
+              User: true,
+              Post: true,
+            },
+          },
+          comment: true,
         },
       });
       if (currentUserId != post.userId) {
@@ -49,7 +66,7 @@ export class PostService {
       });
       return post;
     } catch (error) {
-      return { error: 'something went wrong' };
+      return { error: error.message };
     }
   }
 
@@ -64,15 +81,32 @@ export class PostService {
       });
       const likedPost = await this.prisma.post.update({
         where: {
-          id: id,
+          id: post.id,
         },
         data: {
           likes: post.likes + 1,
+          postLike: {
+            create: {
+              User: {
+                connect: { id: currentUserId },
+              },
+            },
+          },
+        },
+        include: {
+          User: true,
+          postLike: {
+            include: {
+              User: true,
+              Post: true,
+            },
+          },
+          comment: true,
         },
       });
       return likedPost;
     } catch (error) {
-      return { error: 'something went wrong' };
+      return { error: error.message.message };
     }
   }
 
@@ -91,11 +125,29 @@ export class PostService {
         },
         data: {
           likes: post.likes - 1,
+          postLike: {
+            delete: {
+              userId_postId: {
+                userId: currentUserId,
+                postId: post.id,
+              },
+            },
+          },
+        },
+        include: {
+          User: true,
+          postLike: {
+            include: {
+              User: true,
+              Post: true,
+            },
+          },
+          comment: true,
         },
       });
       return unlikedPost;
     } catch (error) {
-      return { error: 'something went wrong' };
+      return { error: error.message };
     }
   }
 
@@ -105,7 +157,7 @@ export class PostService {
       const currentUserId = data.id;
       const comment = await this.prisma.comment.create({
         data: {
-          comment: commentBody,
+          comment: commentBody.comment,
           Post: {
             connect: {
               id: id,
@@ -117,10 +169,14 @@ export class PostService {
             },
           },
         },
+        include: {
+          User: true,
+          Post: true,
+        },
       });
       return comment;
     } catch (error) {
-      return { error: 'something went wrong' };
+      return { error: error.message };
     }
   }
 
@@ -131,12 +187,19 @@ export class PostService {
           id: id,
         },
         include: {
+          User: true,
+          postLike: {
+            include: {
+              User: true,
+              Post: true,
+            },
+          },
           comment: true,
         },
       });
       return posts;
     } catch (error) {
-      return { error: 'something went wrong' };
+      return { error: error.message };
     }
   }
 
@@ -159,7 +222,7 @@ export class PostService {
       });
       return posts;
     } catch (error) {
-      return { error: 'something went wrong' };
+      return { error: error.message };
     }
   }
 }

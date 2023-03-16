@@ -11,25 +11,30 @@ datasource db {
 }
 
 model User {
-  id         String    @id @default(uuid())
+  id         String      @id @default(uuid())
   name       String
-  email      String
+  email      String      @unique
   password   String
-  followers  Int       @default(0)
-  followings Int       @default(0)
+  followers  Int         @default(0)
+  follower   Follower[]
+  followings Int         @default(0)
+  following  Following[]
   post       Post[]
   Comment    Comment[]
+  postLike   PostLike[]
+  created_at DateTime    @default(now())
 }
 
 model Post {
-  id         String    @id @default(uuid())
+  id         String     @id @default(uuid())
   title      String
   desc       String
-  created_at DateTime  @default(now())
-  likes      Int       @default(0)
-  User       User      @relation(fields: [userId], references: [id])
+  created_at DateTime   @default(now())
+  likes      Int        @default(0)
+  User       User       @relation(fields: [userId], references: [id])
   userId     String
   comment    Comment[]
+  postLike   PostLike[]
 }
 
 model Comment {
@@ -38,6 +43,31 @@ model Comment {
   created_at DateTime @default(now())
   Post       Post     @relation(fields: [postId], references: [id])
   postId     String
-  User       User?    @relation(fields: [userId], references: [id])
-  userId     String?
+  User       User     @relation(fields: [userId], references: [id])
+  userId     String
+}
+
+model PostLike {
+  id         String   @id @default(uuid())
+  Post       Post     @relation(fields: [postId], references: [id])
+  postId     String
+  User       User     @relation(fields: [userId], references: [id])
+  userId     String
+  created_at DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model Follower {
+  id         String   @id
+  created_at DateTime @default(now())
+  User       User     @relation(fields: [userId], references: [id])
+  userId     String
+}
+
+model Following {
+  id         String   @id
+  created_at DateTime @default(now())
+  User       User     @relation(fields: [userId], references: [id])
+  userId     String
 }
