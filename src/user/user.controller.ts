@@ -5,9 +5,13 @@ import { UserService } from './user.service';
 @Controller()
 export class UserController {
   constructor(private readonly userService: UserService) {}
-  @Post('/authenticate')
+  @Post('/user')
   async insertUser(@Body() userBody) {
     return await this.userService.insertUser(userBody);
+  }
+  @Post('/authenticate')
+  async authenticate(@Body() userBody) {
+    return await this.userService.authenticate(userBody);
   }
 
   @Post('/follow/:id')
