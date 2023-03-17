@@ -12,6 +12,7 @@ RUN npx prisma generate --schema ./prisma/schema.prisma
 
 COPY package.json package-lock.json ./
 
+RUN npm install --legacy-peer-deps
 
 COPY . /app
 
