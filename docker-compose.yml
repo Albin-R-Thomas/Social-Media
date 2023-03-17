@@ -6,10 +6,3 @@ services:
     restart: unless-stopped
     ports:
       - 3000:3000
-
-  backend-start:
-    extends:
-      service: backend
-    build:
-      target: builder
-    command: 'bash /app/dev-run.sh'
