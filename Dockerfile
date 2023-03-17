@@ -30,4 +30,4 @@ COPY --from=builder /app/prisma/ /app/prisma
 COPY --from=builder /app/node_modules/ /app/node_modules/
 COPY  migrate.sh /app/migrate.sh
 
-CMD ["node", "dist/src/main.js"]
+CMD ["node", "dist/main.js"]
