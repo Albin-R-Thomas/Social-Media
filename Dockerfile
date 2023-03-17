@@ -16,6 +16,8 @@ RUN npm install --legacy-peer-deps
 
 COPY . /app
 
+RUN npm run test
+
 RUN npx nest build
 RUN ls dist
 FROM node:16 as runner
