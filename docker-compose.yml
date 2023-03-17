@@ -8,3 +8,10 @@ services:
       - 3000:3000
     commands:
       - npm run start
+
+  backend-start:
+    extends:
+      service: backend
+    build:
+      target: builder
+    command: 'bash /app/dev-run.sh'
