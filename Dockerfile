@@ -1,26 +1,33 @@
-FROM node:16-alpine as builder
+FROM node:16 as builder
 
-ENV NODE_ENV build
+WORKDIR /app
 
-WORKDIR /home/node
+RUN npm install prisma
+RUN npm install @prisma/client
+RUN npm install concurrently
 
-COPY package*.json ./
-RUN npm ci
+COPY prisma prisma
 
-COPY --chown=node:node . .
-RUN npm run build \
-    && npm prune --production
+RUN npx prisma generate --schema ./prisma/schema.prisma
 
-# ---
+COPY package.json npm-lock.yaml ./
 
-FROM node:16-alpine
+RUN npm install --frozen-lockfile
 
-ENV NODE_ENV production
+COPY . /app
 
-WORKDIR /home/node
+RUN npx nest build
+RUN ls dist
+FROM node:16 as runner
+WORKDIR /app
 
-COPY --from=builder --chown=node:node /home/node/package*.json ./
-COPY --from=builder --chown=node:node /home/node/node_modules/ ./node_modules/
-COPY --from=builder --chown=node:node /home/node/dist/ ./dist/
+RUN mkdir -p /app/dist/
 
-CMD ["node", "dist/main.js"]
+COPY --from=builder /app/package*.json /app/
+COPY --from=builder /app/npm-lock.yaml /app/
+COPY --from=builder /app/dist/ /app/dist/
+COPY --from=builder /app/prisma/ /app/prisma
+COPY --from=builder /app/node_modules/ /app/node_modules/
+COPY  migrate.sh /app/migrate.sh
+
+CMD ["node", "dist/src/main.js"]
