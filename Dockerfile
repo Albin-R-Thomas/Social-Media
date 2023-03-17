@@ -10,9 +10,8 @@ COPY prisma prisma
 
 RUN npx prisma generate --schema ./prisma/schema.prisma
 
-COPY package.json npm-lock.yaml ./
+COPY package.json package-lock.json ./
 
-RUN npm install --frozen-lockfile
 
 COPY . /app
 
