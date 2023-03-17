@@ -6,3 +6,5 @@ services:
     restart: unless-stopped
     ports:
       - 3000:3000
+    commands:
+      - npm run start
